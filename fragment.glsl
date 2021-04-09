@@ -4,6 +4,7 @@ out vec4 frag_color;
 
 uniform int scene;
 uniform float g_seed;
+uniform float blend;
 
 uniform vec3 camera_forward;
 uniform vec3 camera_up;
@@ -429,5 +430,5 @@ void main()
 
   color_result /= n_rays;
 
-  frag_color = vec4(pow(color_result, vec3(0.5, 0.5, 0.5)), 1.0);
+  frag_color = vec4(pow(color_result, vec3(0.5, 0.5, 0.5)), blend);
 }

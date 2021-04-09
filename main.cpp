@@ -191,6 +191,7 @@ int main(int argc, char** argv) {
   // The rule that if the triangle is wound facing the viewer it will be shown
   //GL_DEBUG(glEnable(GL_CULL_FACE));
 
+  GL_DEBUG(glEnable(GL_BLEND));
   // Compile our shaders
   GLint vertex_shader;
   GLint fragment_shader;
@@ -267,6 +268,7 @@ int main(int argc, char** argv) {
   glUseProgram(program);
 
   GLint g_seed = glGetUniformLocation(program, "g_seed");
+  GLint u_blend = glGetUniformLocation(program, "blend");
   GLint u_scene = glGetUniformLocation(program, "scene");
   glUniform1i(u_scene, 1);
   GLint u_camera_pos = glGetUniformLocation(program, "camera_pos");
@@ -288,6 +290,8 @@ int main(int argc, char** argv) {
   SDL_GL_SetSwapInterval(0);
   std::unordered_map<int, bool> keys;
 
+  long long frames_still = 0;
+
   while(true) {
     auto cur_time = Now();
     double delta_time = ElapsedSeconds(last_time, cur_time);
@@ -302,42 +306,63 @@ int main(int argc, char** argv) {
 
     vec3 camera_right = cross(camera_forward, {0, 1, 0});
     vec3 camera_up = cross(camera_right, camera_forward);
+    bool moving = false;
 
     if (keys[SDLK_w]) {
       camera_pos += camera_forward * delta_time;
+      moving = true;
     }
     if (keys[SDLK_s]) {
       camera_pos += -1 * camera_forward * delta_time;
+      moving = true;
     }
     if (keys[SDLK_a]) {
       camera_pos += -1 * camera_right * delta_time;
+      moving = true;
     }
     if (keys[SDLK_d]) {
       camera_pos += 1 * camera_right * delta_time;
+      moving = true;
     }
     if (keys[SDLK_SPACE]) {
       camera_pos += 1 * camera_up * delta_time;
+      moving = true;
     }
     if (keys[SDLK_LSHIFT]) {
       camera_pos += -1 * camera_up * delta_time;
+      moving = true;
     }
     if (keys[SDLK_LEFT]) {
       cam_angle_up -= 45 * 2 * 3.14159 / 180 * delta_time;
+      moving = true;
     }
     if (keys[SDLK_RIGHT]) {
       cam_angle_up += 45 * 2 * 3.14159 / 180 * delta_time;
+      moving = true;
     }
     if (keys[SDLK_1]) {
       glUniform1i(u_scene, 1);
+      moving = true;
     }
     if (keys[SDLK_2]) {
       glUniform1i(u_scene, 2);
+      moving = true;
     }
     if (keys[SDLK_3]) {
       glUniform1i(u_scene, 3);
+      moving = true;
     }
     if (keys[SDLK_4]) {
       glUniform1i(u_scene, 4);
+      moving = true;
+    }
+
+    glUniform1f(u_blend, moving ? 1 : std::max(0.05, 0.1 * std::exp((1 - frames_still) / 100.0)));
+
+    if (moving) {
+      frames_still = 1;
+    } else {
+      frames_still += 1;
     }
 
     camera_forward = vec3{cos(cam_angle_up), 0, sin(cam_angle_up)};
@@ -369,9 +394,10 @@ int main(int argc, char** argv) {
       }
     }
     // Set our black background
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Now we draw the triangles. There are 3 points to draw
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     GL_DEBUG(glDrawArrays(GL_TRIANGLES, 0, 3));
     // Swap the output
     SDL_GL_SwapWindow(window);
