@@ -141,8 +141,8 @@ int main(int argc, char** argv) {
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
   // Create the SDL window
   SDL_Window* window = SDL_CreateWindow(
-      "Hello Triangle", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600,
-      600, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+      "Raytracer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800,
+      800, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
   if (window == NULL) {
     fprintf(stderr, "Unable to create SDL Window\n");
     fprintf(stderr, "%s\n", SDL_GetError());
